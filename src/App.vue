@@ -24,7 +24,7 @@ const currentStep = ref(STEPS.NO_SELECTION);
 
 const practiceStrings = [
     "Copy this text and paste it in the box.",
-    "Now copy THIS text and past it in the box.",
+    "Now copy THIS text and paste it in the box.",
     "Can you do it again?",
     "I can't believe it!",
     "You're so good at copying and pasting!",
