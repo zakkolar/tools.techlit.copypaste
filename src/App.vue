@@ -16,12 +16,35 @@ const STEPS = Object.freeze({
     CTRL_BEFORE_PASTE: "CTRL_BEFORE_PASTE",
     CTRL_AFTER_PASTE: "CTRL_AFTER_PASTE",
     PASTED: "PASTED",
-    PASTED_MULTIPLE: "PASTED_MULTIPLE"
+    PASTED_MULTIPLE: "PASTED_MULTIPLE",
+    PASTED_INCORRECT: "PASTED_INCORRECT"
 })
 
 const currentStep = ref(STEPS.NO_SELECTION);
 
-const currentText = ref("Copy this text and paste it in the box.")
+const practiceStrings = [
+    "Copy this text and paste it in the box.",
+    "Now copy THIS text and past it in the box.",
+    "Can you do it again?",
+    "I can't believe it!",
+    "You're so good at copying and pasting!",
+    "Wow, you're unstoppable!",
+    "Paste this one if you're a pro.",
+    "Is this too easy for you?",
+    "Impressive! You're a natural.",
+    "Copying and pasting is no match for you!",
+    "You're officially a copy-paste master.",
+    "Keep going, you're on a roll!",
+    "Can you paste this with your eyes closed?",
+    "Bet you can't do this one in under 3 seconds!",
+    "Copy and paste this if you're having fun!",
+    "I bet you can't guess what's next..."
+]
+
+const currentTextIndex = ref(0);
+
+const currentText = ref(practiceStrings[0])
+
 const currentSelection = ref("");
 
 const ctrlKeys = ref(0);
@@ -69,6 +92,15 @@ function reset() {
 
     currentSelection.value = "";
     currentStep.value = STEPS.NO_SELECTION;
+}
+
+function next() {
+    currentTextIndex.value++;
+    if(currentTextIndex.value === practiceStrings.length) {
+        currentTextIndex.value = 0;
+    }
+    currentText.value = practiceStrings[currentTextIndex.value];
+    reset();
 }
 
 function checkStep() {
@@ -120,7 +152,7 @@ function checkStep() {
         }
     }
 
-    if (![STEPS.PASTED_MULTIPLE, STEPS.PASTED, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value) && copied.value === currentText.value) {
+    if (![STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.PASTED, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value) && copied.value === currentText.value) {
         if (ctrlPressed.value && !ctrlReleasedAfterCopy.value) {
             currentStep.value = STEPS.CTRL_AFTER_COPY
         } else {
@@ -138,7 +170,7 @@ function checkStep() {
         }
     }
 
-    if ([STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value)) {
+    if ([STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value)) {
         if (pasted.value === currentText.value) {
             if (ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
                 currentStep.value = STEPS.CTRL_AFTER_PASTE;
@@ -148,6 +180,8 @@ function checkStep() {
             }
         } else if (countSubstrings(pasted.value, currentText.value) > 1) {
             currentStep.value = STEPS.PASTED_MULTIPLE;
+        } else if (pasted.value && pasted.value !== currentText.value) {
+            currentStep.value = STEPS.PASTED_INCORRECT;
         } else if (ctrlPressed.value) {
             currentStep.value = STEPS.CTRL_BEFORE_PASTE;
         } else {
@@ -263,7 +297,7 @@ onMounted(() => {
             <h1>Copy and Paste</h1>
             <div id="workspace" class="panel">
                 <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
-                <textarea v-model="pasted" @input="checkStep" id="pasteTarget"
+                <textarea :disabled="![STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.CTRL_AFTER_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)" v-model="pasted" @input="checkStep" id="pasteTarget"
 
                 ></textarea>
             </div>
@@ -306,12 +340,18 @@ onMounted(() => {
 
                 <div v-if="currentStep === STEPS.PASTED">
                     Done!
+                    <button @click="next">Try another</button>
                 </div>
 
                 <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
                     Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
                     press will do.
                     <button @click="tryAgain">Try again</button>
+                </div>
+
+                <div v-if="currentStep === STEPS.PASTED_INCORRECT">
+                    Hmm... that doesn't look quite right. Let's try one more time!
+                    <button @click="reset">Try again</button>
                 </div>
             </div>
         </div>
@@ -358,6 +398,14 @@ textarea {
     font-size: inherit;
     text-align: inherit;
     resize: none;
+    background: white;
+    border-style: solid;
+    border-width: 2px;
+}
+
+textarea:disabled {
+    background: #f5f5f5;
+    cursor: not-allowed;
 }
 
 button {
