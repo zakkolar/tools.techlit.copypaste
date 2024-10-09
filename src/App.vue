@@ -7,6 +7,7 @@ const STEPS = Object.freeze({
     PARTIAL_SELECTION_NOT_TO_END: "PARTIAL_SELECTION_NOT_TO_END",
     PARTIAL_SELECTION_NOT_FROM_END: "PARTIAL_SELECTION_NOT_FROM_END",
     PARTIAL_SELECTION_NOT_TO_BEGINNING: "PARTIAL_SELECTION_NOT_TO_BEGINNING",
+    SELECTION_END: "SELECTION_END",
     SELECTED: "SELECTED",
     CTRL_BEFORE_COPY: "CTRL_BEFORE_COPY",
     CTRL_AFTER_COPY: "CTRL_AFTER_COPY",
@@ -20,7 +21,7 @@ const STEPS = Object.freeze({
 
 const currentStep = ref(STEPS.NO_SELECTION);
 
-const currentText = ref("You can copy and paste me!")
+const currentText = ref("Copy this text and paste it in the box.")
 const currentSelection = ref("");
 
 const ctrlKeys = ref(0);
@@ -40,15 +41,30 @@ const dragging = ref(false);
 
 const CURRENT_TEXT_ID = 'currentTextId';
 
+function reset() {
+    copied.value = "";
+    ctrlReleasedAfterCopy.value = false;
+
+    pasted.value = "";
+    ctrlReleasedAfterPaste.value = false;
+
+    currentSelection.value = "";
+    currentStep.value = STEPS.NO_SELECTION;
+}
+
 function checkStep() {
 
     const selection = window.getSelection();
 
     currentSelection.value = selection.toString();
 
-    if ([STEPS.NO_SELECTION, STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING, STEPS.PARTIAL_SELECTION_NOT_TO_END, STEPS.PARTIAL_SELECTION_NOT_FROM_END, STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING, STEPS.SELECTED].includes(currentStep.value)) {
+    if ([STEPS.NO_SELECTION, STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING, STEPS.PARTIAL_SELECTION_NOT_TO_END, STEPS.PARTIAL_SELECTION_NOT_FROM_END, STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING, STEPS.SELECTION_END, STEPS.SELECTED].includes(currentStep.value)) {
         if (currentSelection.value === currentText.value) {
-            currentStep.value = STEPS.SELECTED;
+            if (dragging.value) {
+                currentStep.value = STEPS.SELECTION_END;
+            } else {
+                currentStep.value = STEPS.SELECTED;
+            }
         } else if (
             (currentSelection.value.length > 0 || selection.rangeCount === 0) &&
             currentText.value.indexOf(currentSelection.value) > -1 &&
@@ -57,18 +73,17 @@ function checkStep() {
             if (!dragging.value) {
                 currentStep.value = STEPS.NO_SELECTION
             } else {
-                    if (selection.anchorOffset > 0) {
+                if (selection.anchorOffset > 0) {
 
-                        if(selection.anchorOffset === currentText.value.length) {
-                            currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING;
-                        }
-                        else {
-                            currentStep.value = STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING
-                        }
-
+                    if (selection.anchorOffset === currentText.value.length) {
+                        currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING;
                     } else {
-                        currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_END
+                        currentStep.value = STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING
                     }
+
+                } else {
+                    currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_END
+                }
 
             }
 
@@ -87,11 +102,10 @@ function checkStep() {
     }
 
     if (![STEPS.PASTED_MULTIPLE, STEPS.PASTED, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value) && copied.value === currentText.value) {
-        if(ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
+        if (ctrlPressed.value && !ctrlReleasedAfterCopy.value) {
             currentStep.value = STEPS.CTRL_AFTER_COPY
-        }
-        else {
-            ctrlReleasedAfterPaste.value = true;
+        } else {
+            ctrlReleasedAfterCopy.value = true;
             currentStep.value = STEPS.COPIED;
         }
     }
@@ -107,10 +121,9 @@ function checkStep() {
 
     if ([STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value)) {
         if (pasted.value === currentText.value) {
-            if(ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
+            if (ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
                 currentStep.value = STEPS.CTRL_AFTER_PASTE;
-            }
-            else {
+            } else {
                 ctrlReleasedAfterPaste.value = true;
                 currentStep.value = STEPS.PASTED;
             }
@@ -186,6 +199,8 @@ onMounted(() => {
 
     document.addEventListener('selectstart', checkStep);
 
+    document.addEventListener('selectionchange', checkStep);
+
     document.addEventListener('keydown', e => keyDown(e))
 
     document.addEventListener('keyup', e => keyUp(e))
@@ -195,65 +210,111 @@ onMounted(() => {
 </script>
 
 <template>
-    <div v-if="currentStep === STEPS.NO_SELECTION">
-        <span v-if="currentSelection">Try again! </span>Click and drag over the text below to select it.
+    <div id="app">
+        <h1>Copy and Paste</h1>
+         <div id="workspace" class="panel">
+            <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
+            <textarea v-model="pasted" @input="checkStep" id="pasteTarget"
+
+            ></textarea>
+        </div>
+        <div id="instructions" class="panel">
+            <div v-if="currentStep === STEPS.NO_SELECTION">
+                Click and drag over the text to select it.
+            </div>
+            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
+                Let go of the mouse and try again. Make sure you start at the very beginning!
+            </div>
+            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
+                Keep going all the way to the end!
+            </div>
+            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
+                Keep going all the way to the beginning!
+            </div>
+            <div v-if="currentStep === STEPS.SELECTION_END">
+                Let go of your mouse.
+            </div>
+            <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
+                Press and hold the ctrl key on your keyboard.
+            </div>
+
+            <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
+                Quickly tap the C key on your keyboard to copy.
+            </div>
+
+            <div v-if="currentStep === STEPS.COPIED">
+                Click inside the box to tell your computer where to paste.
+            </div>
+
+            <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
+                Quickly tap the V on your keyboard to paste.
+            </div>
+
+            <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
+                Let go of Ctrl.
+            </div>
+
+            <div v-if="currentStep === STEPS.PASTED">
+                Done!
+            </div>
+
+            <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
+                Oh no! Too many pastes! When you paste, don't hold V down. Just a quick press will do.
+                <button @click="tryAgain">Try again</button>
+            </div>
+        </div>
+
+
 
     </div>
-    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
-        Let go of the mouse and try again. Make sure you start at the very beginning!
-    </div>
-    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
-        Keep going all the way to the end!
-    </div>
-    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
-        Keep going all the way to the beginning!
-    </div>
-
-
-    <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
-        Press and hold the ctrl key on your keyboard.
-    </div>
-
-    <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
-        Quickly tap the C key on your keyboard to copy.
-    </div>
-
-    <div v-if="currentStep === STEPS.COPIED">
-            Click inside the box to tell your computer where to paste.
-    </div>
-
-    <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
-        Quickly tap the V on your keyboard to paste.
-    </div>
-
-    <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-        Let go of Ctrl.
-    </div>
-
-    <div v-if="currentStep === STEPS.PASTED">
-        Done!
-    </div>
-
-    <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
-        Oh no! Too many pastes! Just do do a quick press on V. You don't need to hold it down.
-        <button @click="tryAgain">Try again</button>
-    </div>
-
-    <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
-    <input v-model="pasted" @input="checkStep" id="pasteTarget"
-           v-if="[STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-
-
 </template>
 
-<style>
-* {
-    -webkit-user-select: none;
-    user-select: none;
-}
+<style scoped>
 
 .selectable {
     -webkit-user-select: text;
     user-select: text;
 }
+
+#app {
+    -webkit-user-select: none;
+    user-select: none;
+    text-align: center;
+    font-size: 2.5em;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 0;
+    margin: 0;
+}
+
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    text-align: inherit;
+    resize: none;
+}
+
+button {
+    display: block;
+    font-family: inherit;
+    font-size: inherit;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+}
+
+#instructions {
+    font-size: 0.8em;
+    max-width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--vt-c-text-light-2)
+}
+
+#instructions h2 {
+    color: var(--vt-c-text-light-1);
+}
+
+
 </style>
