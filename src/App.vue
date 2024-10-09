@@ -26,6 +26,25 @@ const currentSelection = ref("");
 
 const ctrlKeys = ref(0);
 
+const shortcutKeyOptions = {
+    "ctrl": {
+        label: "ctrl",
+        platform: "PC/Chromebook"
+    },
+    "command": {
+        label: "⌘ command",
+        platform: "Mac"
+    }
+}
+
+const shortcutKey = ref("");
+
+const PLATFORM_MODIFIER_KEYS = Object.freeze({
+    CONTROL: "Control",
+    COMMAND: "Meta"
+})
+
+const platformModifier = ref("Control")
 
 const copied = ref("");
 const ctrlReleasedAfterCopy = ref(false);
@@ -165,7 +184,7 @@ function mouseUp() {
 }
 
 function keyDown(e) {
-    if (e.key === 'Control') {
+    if (e.key === platformModifier.value) {
         ctrlKeys.value++;
         checkStep();
     }
@@ -173,7 +192,7 @@ function keyDown(e) {
 }
 
 function keyUp(e) {
-    if (e.key === 'Control' && ctrlKeys.value > 0) {
+    if (e.key === platformModifier.value && ctrlKeys.value > 0) {
         ctrlKeys.value--;
         checkStep();
     }
@@ -186,6 +205,24 @@ function copy(e) {
     copied.value = currentSelection.value;
     ctrlReleasedAfterPaste.value = false;
     checkStep();
+}
+
+function updateFromParams() {
+    const params = {};
+    window.location.hash.substring(1).split("&").forEach(item => {
+        const parts = item.split("=");
+        params[parts[0]] = parts[1];
+    })
+
+    const key = shortcutKeyOptions[params.key];
+
+    if(key) {
+        shortcutKey.value = key.label;
+    }
+    else {
+        shortcutKey.value = null;
+    }
+
 }
 
 onMounted(() => {
@@ -201,9 +238,20 @@ onMounted(() => {
 
     document.addEventListener('selectionchange', checkStep);
 
-    document.addEventListener('keydown', e => keyDown(e))
+    document.addEventListener('keydown', keyDown)
 
-    document.addEventListener('keyup', e => keyUp(e))
+    document.addEventListener('keyup', keyUp)
+
+    window.addEventListener('hashchange', updateFromParams)
+
+    updateFromParams();
+
+    if(navigator.platform.toLowerCase().indexOf('mac') > -1) {
+        platformModifier.value = PLATFORM_MODIFIER_KEYS.COMMAND;
+    }
+    else {
+        platformModifier.value = PLATFORM_MODIFIER_KEYS.CONTROL;
+    }
 
 })
 
@@ -211,59 +259,76 @@ onMounted(() => {
 
 <template>
     <div id="app">
-        <h1>Copy and Paste</h1>
-         <div id="workspace" class="panel">
-            <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
-            <textarea v-model="pasted" @input="checkStep" id="pasteTarget"
+        <div v-if="shortcutKey">
+            <h1>Copy and Paste</h1>
+            <div id="workspace" class="panel">
+                <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
+                <textarea v-model="pasted" @input="checkStep" id="pasteTarget"
 
-            ></textarea>
+                ></textarea>
+            </div>
+            <div id="instructions" class="panel">
+                <div v-if="currentStep === STEPS.NO_SELECTION">
+                    Click and drag over the text to select it.
+                    <div v-if="currentSelection">Start from the beginning and go all the way to the end.</div>
+                </div>
+                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
+                    Let go of the mouse and try again. Make sure you start at the very beginning!
+                </div>
+                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
+                    Keep going all the way to the end!
+                </div>
+                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
+                    Keep going all the way to the beginning!
+                </div>
+                <div v-if="currentStep === STEPS.SELECTION_END">
+                    Let go of your mouse.
+                </div>
+                <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
+                    Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.
+                </div>
+
+                <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
+                    Quickly tap the <span class="key">C</span> key on your keyboard to copy.
+                </div>
+
+                <div v-if="currentStep === STEPS.COPIED">
+                    Click inside the box to tell your computer where to paste.
+                </div>
+
+                <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
+                    Quickly tap the <span class="key">V</span> on your keyboard to paste.
+                </div>
+
+                <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
+                    Let go of <span class="key">{{ shortcutKey }}</span>.
+                </div>
+
+                <div v-if="currentStep === STEPS.PASTED">
+                    Done!
+                </div>
+
+                <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
+                    Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
+                    press will do.
+                    <button @click="tryAgain">Try again</button>
+                </div>
+            </div>
         </div>
-        <div id="instructions" class="panel">
-            <div v-if="currentStep === STEPS.NO_SELECTION">
-                Click and drag over the text to select it.
-            </div>
-            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
-                Let go of the mouse and try again. Make sure you start at the very beginning!
-            </div>
-            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
-                Keep going all the way to the end!
-            </div>
-            <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
-                Keep going all the way to the beginning!
-            </div>
-            <div v-if="currentStep === STEPS.SELECTION_END">
-                Let go of your mouse.
-            </div>
-            <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
-                Press and hold the ctrl key on your keyboard.
+        <div v-else>
+
+            <h1 style="font-size: 1.3em; margin-top: 40px;">Which modifier key do you want to display?</h1>
+            <div id="key-select">
+                <div v-for="key of Object.keys(shortcutKeyOptions)">
+                    <a class="key" :href="`#key=${key}`">
+                        {{shortcutKeyOptions[key].label}}
+                    </a>
+                    ({{shortcutKeyOptions[key].platform}})
+                </div>
             </div>
 
-            <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
-                Quickly tap the C key on your keyboard to copy.
-            </div>
-
-            <div v-if="currentStep === STEPS.COPIED">
-                Click inside the box to tell your computer where to paste.
-            </div>
-
-            <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
-                Quickly tap the V on your keyboard to paste.
-            </div>
-
-            <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-                Let go of Ctrl.
-            </div>
-
-            <div v-if="currentStep === STEPS.PASTED">
-                Done!
-            </div>
-
-            <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
-                Oh no! Too many pastes! When you paste, don't hold V down. Just a quick press will do.
-                <button @click="tryAgain">Try again</button>
-            </div>
+            <p style="margin-top: 40px; font-size: 0.6em; max-width: 60%; margin-left: auto; margin-right: auto">This choice only determines the key that is displayed in the on-screen instructions. The app will always detect the correct key press from your keyboard.</p>
         </div>
-
 
 
     </div>
@@ -314,6 +379,25 @@ button {
 
 #instructions h2 {
     color: var(--vt-c-text-light-1);
+}
+
+.key {
+    display: inline-block;
+    background: #181818;
+    color: #f2f2f2;
+    padding: 0 10px;
+}
+
+a.key {
+    text-decoration: none;
+}
+
+#key-select {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    column-gap: 1em;
+    margin-top: 1em;
 }
 
 
