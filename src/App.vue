@@ -60,6 +60,8 @@ const shortcutKeyOptions = {
     }
 }
 
+const showInstructions = ref(true);
+
 const shortcutKey = ref("");
 
 const PLATFORM_MODIFIER_KEYS = Object.freeze({
@@ -96,7 +98,7 @@ function reset() {
 
 function next() {
     currentTextIndex.value++;
-    if(currentTextIndex.value === practiceStrings.length) {
+    if (currentTextIndex.value === practiceStrings.length) {
         currentTextIndex.value = 0;
     }
     currentText.value = practiceStrings[currentTextIndex.value];
@@ -250,10 +252,9 @@ function updateFromParams() {
 
     const key = shortcutKeyOptions[params.key];
 
-    if(key) {
+    if (key) {
         shortcutKey.value = key.label;
-    }
-    else {
+    } else {
         shortcutKey.value = null;
     }
 
@@ -280,10 +281,9 @@ onMounted(() => {
 
     updateFromParams();
 
-    if(navigator.platform.toLowerCase().indexOf('mac') > -1) {
+    if (navigator.platform.toLowerCase().indexOf('mac') > -1) {
         platformModifier.value = PLATFORM_MODIFIER_KEYS.COMMAND;
-    }
-    else {
+    } else {
         platformModifier.value = PLATFORM_MODIFIER_KEYS.CONTROL;
     }
 
@@ -297,45 +297,49 @@ onMounted(() => {
             <h1>Copy and Paste</h1>
             <div id="workspace" class="panel">
                 <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
-                <textarea :disabled="![STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.CTRL_AFTER_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)" v-model="pasted" @input="checkStep" id="pasteTarget"
+                <textarea
+                        :disabled="![STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.CTRL_AFTER_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
+                        v-model="pasted" @input="checkStep" id="pasteTarget"
 
                 ></textarea>
             </div>
             <div id="instructions" class="panel">
-                <div v-if="currentStep === STEPS.NO_SELECTION">
-                    Click and drag over the text to select it.
-                    <div v-if="currentSelection">Start from the beginning and go all the way to the end.</div>
-                </div>
-                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
-                    Let go of the mouse and try again. Make sure you start at the very beginning!
-                </div>
-                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
-                    Keep going all the way to the end!
-                </div>
-                <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
-                    Keep going all the way to the beginning!
-                </div>
-                <div v-if="currentStep === STEPS.SELECTION_END">
-                    Let go of your mouse.
-                </div>
-                <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
-                    Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.
-                </div>
+                <div v-if="showInstructions">
+                    <div v-if="currentStep === STEPS.NO_SELECTION">
+                        Click and drag over the text to select it.
+                        <div v-if="currentSelection">Start from the beginning and go all the way to the end.</div>
+                    </div>
+                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
+                        Let go of the mouse and try again. Make sure you start at the very beginning!
+                    </div>
+                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
+                        Keep going all the way to the end!
+                    </div>
+                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
+                        Keep going all the way to the beginning!
+                    </div>
+                    <div v-if="currentStep === STEPS.SELECTION_END">
+                        Let go of your mouse.
+                    </div>
+                    <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
+                        Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.
+                    </div>
 
-                <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
-                    Quickly tap the <span class="key">C</span> key on your keyboard to copy.
-                </div>
+                    <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
+                        Quickly tap the <span class="key">C</span> key on your keyboard to copy.
+                    </div>
 
-                <div v-if="currentStep === STEPS.COPIED">
-                    Click inside the box to tell your computer where to paste.
-                </div>
+                    <div v-if="currentStep === STEPS.COPIED">
+                        Click inside the box to tell your computer where to paste.
+                    </div>
 
-                <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
-                    Quickly tap the <span class="key">V</span> on your keyboard to paste.
-                </div>
+                    <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
+                        Quickly tap the <span class="key">V</span> on your keyboard to paste.
+                    </div>
 
-                <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-                    Let go of <span class="key">{{ shortcutKey }}</span>.
+                    <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
+                        Let go of <span class="key">{{ shortcutKey }}</span>.
+                    </div>
                 </div>
 
                 <div v-if="currentStep === STEPS.PASTED">
@@ -353,17 +357,23 @@ onMounted(() => {
                     Hmm... that doesn't look quite right. Let's try one more time!
                     <button @click="reset">Try again</button>
                 </div>
+                <button v-if="![STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
+                        @click="showInstructions = !showInstructions"><span
+                    v-if="showInstructions">Hide</span><span v-else>Show</span> instructions
+                </button>
             </div>
+
         </div>
         <div v-else>
 
-            <h1 style="font-size: 1.2em; margin-top: 40px;">Which modifier key do your students use on their keyboards?</h1>
+            <h1 style="font-size: 1.2em; margin-top: 40px;">Which modifier key do your students use on their
+                keyboards?</h1>
             <div id="key-select">
                 <div v-for="key of Object.keys(shortcutKeyOptions)">
                     <a class="key" :href="`#key=${key}`">
-                        {{shortcutKeyOptions[key].label}}
+                        {{ shortcutKeyOptions[key].label }}
                     </a>
-                    ({{shortcutKeyOptions[key].platform}})
+                    ({{ shortcutKeyOptions[key].platform }})
                 </div>
             </div>
 
@@ -427,6 +437,10 @@ button {
 
 #instructions h2 {
     color: var(--vt-c-text-light-1);
+}
+
+#instructions button {
+    font-size: 0.5em;
 }
 
 .key {
