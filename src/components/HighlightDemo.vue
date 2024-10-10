@@ -48,7 +48,7 @@ onUnmounted(() => {
 })
 
 function stop() {
-    document.getElementById('cursor').classList.remove('ibeam');
+    document.getElementById('cursor')?.classList.remove('ibeam');
     highlightedPosition.value = 0;
     clearTimeout(timer.value);
     playAnimation.value = false;
