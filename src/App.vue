@@ -366,7 +366,7 @@ onMounted(() => {
         </div>
         <div v-else>
 
-            <h1 style="font-size: 1.2em; margin-top: 40px;">Which modifier key do your students use on their
+            <h1 style="font-size: 1.2em; margin-top: 40px;">Which modifier key do your <em>students</em> use on their
                 keyboards?</h1>
             <div id="key-select">
                 <div v-for="key of Object.keys(shortcutKeyOptions)">
@@ -377,11 +377,12 @@ onMounted(() => {
                 </div>
             </div>
 
-            <p style="margin-top: 40px; font-size: 0.6em; max-width: 60%; margin-left: auto; margin-right: auto">You can demo this from any computer - PC, Chromebook, or Mac. The app automatically accounts for your computer's modifier key.</p>
+            <p style="margin-top: 40px; font-size: 0.6em; max-width: 60%; margin-left: auto; margin-right: auto">You can demo this from any computer - PC, Chromebook, or Mac.</p>
         </div>
-
-
     </div>
+
+
+
 </template>
 
 <style scoped>
