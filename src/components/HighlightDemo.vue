@@ -141,7 +141,7 @@ button.control {
     border: none;
     font-size: 0.6em;
     color: #c4c4c4;
-    transition: color 0.2s linear;
+    transition: color 0.1s linear;
 }
 
 button.control:hover {
