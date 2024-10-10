@@ -1,5 +1,6 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
+import HighlightDemo from "@/components/HighlightDemo.vue";
 
 const STEPS = Object.freeze({
     NO_SELECTION: "NO_SELECTION",
@@ -302,7 +303,8 @@ onMounted(() => {
             <div id="instructions" class="panel">
                 <div v-if="showInstructions">
                     <div v-if="currentStep === STEPS.NO_SELECTION">
-                        Click and drag over the text to select it.
+<!--                        Click and drag over the text to select it.-->
+                        <highlight-demo text="Click and drag over the text to select it."></highlight-demo>
                         <div v-if="currentSelection">Start from the beginning and go all the way to the end.</div>
                     </div>
                     <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
