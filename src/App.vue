@@ -291,7 +291,7 @@ onMounted(() => {
 <template>
     <div id="app">
         <div v-if="shortcutKey">
-            <h1>Copy and Paste</h1>
+
             <div id="workspace" class="panel">
                 <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
                 <textarea
@@ -364,7 +364,7 @@ onMounted(() => {
         </div>
         <div v-else>
 
-            <h1 style="font-size: 1.2em; margin-top: 40px;">Which modifier key do your <em>students</em> use on their
+            <h1 style="font-size: 1.2em; margin-top: 40px; margin-bottom: 20px;">Which modifier key do your <em>students</em> use on their
                 keyboards?</h1>
             <div id="key-select">
                 <div v-for="key of Object.keys(shortcutKeyOptions)">
@@ -398,7 +398,7 @@ onMounted(() => {
     align-items: center;
     justify-content: center;
     height: 100vh;
-    padding: 0;
+    padding-top: 3em;
     margin: 0;
 }
 
@@ -458,7 +458,6 @@ a.key {
     align-items: center;
     justify-content: center;
     column-gap: 1em;
-    margin-top: 1em;
 }
 
 
