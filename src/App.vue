@@ -47,8 +47,6 @@ const currentText = ref(practiceStrings[0])
 
 const currentSelection = ref("");
 
-const ctrlKeys = ref(0);
-
 const shortcutKeyOptions = {
     "ctrl": {
         label: "ctrl",
@@ -77,9 +75,7 @@ const ctrlReleasedAfterCopy = ref(false);
 const pasted = ref("");
 const ctrlReleasedAfterPaste = ref(false);
 
-const ctrlPressed = computed(() => {
-    return ctrlKeys.value === 1;
-})
+const ctrlPressed = ref(false);
 
 const dragging = ref(false);
 
@@ -221,15 +217,15 @@ function mouseUp() {
 
 function keyDown(e) {
     if (e.key === platformModifier.value) {
-        ctrlKeys.value++;
+        ctrlPressed.value = true;
         checkStep();
     }
 
 }
 
 function keyUp(e) {
-    if (e.key === platformModifier.value && ctrlKeys.value > 0) {
-        ctrlKeys.value--;
+    if (e.key === platformModifier.value) {
+        ctrlPressed.value = false;
         checkStep();
     }
 }
