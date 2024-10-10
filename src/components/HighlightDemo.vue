@@ -11,6 +11,8 @@ const speed = ref(60);
 
 const timer = ref(null);
 
+const playAnimation = ref(true);
+
 function startHighlight() {
     highlightedPosition.value = 0;
     const cursor = document.getElementById('cursor');
@@ -39,12 +41,24 @@ function highlight() {
 }
 
 onMounted(() => {
-    timer.value = setTimeout(startHighlight, 3000)
+    timer.value = setTimeout(play, 3000)
 })
 
 onUnmounted(() => {
-    clearTimeout(timer.value);
+    stop();
 })
+
+function stop() {
+    document.getElementById('cursor').classList.remove('ibeam');
+    highlightedPosition.value = 0;
+    clearTimeout(timer.value);
+    playAnimation.value = false;
+}
+
+function play() {
+    playAnimation.value = true;
+    startHighlight();
+}
 
 </script>
 <template>
@@ -52,6 +66,19 @@ onUnmounted(() => {
         <span v-for="(character, index) of props.text" class="character" :class="{highlighted: highlightedPosition>index}">
       {{ character }}
   </span>
+        <button class="control" v-if="playAnimation" @click="stop">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm6-2.438c0-.724.588-1.312 1.313-1.312h4.874c.725 0 1.313.588 1.313 1.313v4.874c0 .725-.588 1.313-1.313 1.313H9.564a1.312 1.312 0 0 1-1.313-1.313V9.564Z" clip-rule="evenodd" />
+</svg>
+
+
+        </button>
+        <button class="control" v-else @click="play">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+  <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm14.024-.983a1.125 1.125 0 0 1 0 1.966l-5.603 3.113A1.125 1.125 0 0 1 9 15.113V8.887c0-.857.921-1.4 1.671-.983l5.603 3.113Z" clip-rule="evenodd" />
+</svg>
+
+        </button>
         <div id="cursor"></div>
     </div>
 </template>
@@ -91,5 +118,16 @@ onUnmounted(() => {
 
 .container {
     position: relative;
+}
+
+button.control {
+    background: transparent;
+    border: none;
+    font-size: 0.6em;
+}
+button.control svg {
+    width: 1em;
+    height: 1em;
+    margin-bottom: -0.3em;
 }
 </style>
