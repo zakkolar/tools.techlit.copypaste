@@ -1,0 +1,20 @@
+{
+  "version": "1.0",
+  "preview_link": "https://copypaste.techlit.tools/",
+  "title": "Copy and Paste Practice",
+  "format": "queryString",
+  "fields": [
+    {
+      "label": "Modifier Key",
+      "key": "key",
+      "type": "select",
+      "default": "ctrl",
+      "options": {
+        "ctrl": "Ctrl (PC/Chromebook)",
+        "command": "Command (Mac)"
+      },
+      "description": "The modifier key students use to perform keyboard shortcuts on their devices"
+    }
+  ]
+
+}
