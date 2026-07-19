@@ -105,8 +105,8 @@ function next() {
 function checkStep() {
 
     const selection = window.getSelection();
-
-    currentSelection.value = selection.toString();
+  
+    currentSelection.value = selection.rangeCount > 0 ? selection.getRangeAt(0).toString() : "";
 
     if ([STEPS.NO_SELECTION, STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING, STEPS.PARTIAL_SELECTION_NOT_TO_END, STEPS.PARTIAL_SELECTION_NOT_FROM_END, STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING, STEPS.SELECTION_END, STEPS.SELECTED].includes(currentStep.value)) {
         if (currentSelection.value === currentText.value) {
