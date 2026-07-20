@@ -11,45 +11,94 @@ const speed = ref(60);
 
 const timer = ref(null);
 
+const rafId = ref(null);
+
+const isMoving = ref(false);
+
+const pausedAt = ref(null);
+
+const startTime = ref(0);
+
 const playAnimation = ref(true);
+
+function positionCursor(index, cursor, characters) {
+    if (index <= 0) {
+        const first = characters.item(0);
+        cursor.style.left = `${first.offsetLeft}px`;
+        cursor.style.top = `${first.offsetTop + ((first.offsetHeight - cursor.offsetHeight) / 2)}px`;
+    } else {
+        const boundary = characters.item(Math.min(index, characters.length) - 1);
+        cursor.style.left = `${boundary.offsetLeft + boundary.offsetWidth}px`;
+        cursor.style.top = `${boundary.offsetTop + ((boundary.offsetHeight - cursor.offsetHeight) / 2)}px`;
+    }
+}
+
+function tick(now) {
+    const elapsed = now - startTime.value;
+    const index = Math.min(Math.max(Math.floor(elapsed / speed.value), 0), props.text.length);
+    if (index !== highlightedPosition.value) {
+        highlightedPosition.value = index;
+    }
+
+    const cursor = document.getElementById('cursor');
+    const characters = document.getElementsByClassName('character');
+    if (cursor && characters.length) {
+        positionCursor(index, cursor, characters);
+    }
+
+    if (index < props.text.length) {
+        rafId.value = requestAnimationFrame(tick);
+    } else {
+        isMoving.value = false;
+        timer.value = setTimeout(startHighlight, 3000);
+    }
+}
 
 function startHighlight() {
     highlightedPosition.value = 0;
     const cursor = document.getElementById('cursor');
     const characters = document.getElementsByClassName('character');
-    const first = characters.item(0);
-    const last = characters.item(characters.length - 1);
     cursor.classList.add('ibeam');
-    cursor.style.transition = '';
-    cursor.style.left = `${first.offsetLeft}px`;
-    cursor.style.top = `${first.offsetTop + ((first.offsetHeight - cursor.offsetHeight) / 2)}px`;
+    positionCursor(0, cursor, characters);
 
-    highlight();
-    cursor.style.transition = `left ${(speed.value * props.text.length) / 1000}s linear`;
-
-    cursor.style.left = `${last.offsetLeft + last.offsetWidth}px`
+    startTime.value = performance.now();
+    isMoving.value = true;
+    rafId.value = requestAnimationFrame(tick);
 }
 
-function highlight() {
-    highlightedPosition.value++;
-    if (highlightedPosition.value < props.text.length) {
-        timer.value = setTimeout(highlight, speed.value)
-    } else {
-        timer.value = setTimeout(startHighlight, 3000);
+function handleVisibilityChange() {
+    if (document.hidden) {
+        if (isMoving.value && rafId.value != null) {
+            cancelAnimationFrame(rafId.value);
+            rafId.value = null;
+            pausedAt.value = performance.now();
+        }
+    } else if (isMoving.value && pausedAt.value != null) {
+        startTime.value += performance.now() - pausedAt.value;
+        pausedAt.value = null;
+        rafId.value = requestAnimationFrame(tick);
     }
 }
 
 onMounted(() => {
     timer.value = setTimeout(play, 3000)
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 })
 
 onUnmounted(() => {
     stop();
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
 })
 
 function stop() {
     document.getElementById('cursor')?.classList.remove('ibeam');
     highlightedPosition.value = 0;
+    if (rafId.value != null) {
+        cancelAnimationFrame(rafId.value);
+    }
+    rafId.value = null;
+    isMoving.value = false;
+    pausedAt.value = null;
     clearTimeout(timer.value);
     playAnimation.value = false;
 }
