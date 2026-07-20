@@ -3,43 +3,43 @@ import {computed, onMounted, ref} from "vue";
 import HighlightDemo from "@/components/HighlightDemo.vue";
 
 const STEPS = Object.freeze({
-    NO_SELECTION: "NO_SELECTION",
-    PARTIAL_SELECTION_NOT_FROM_BEGINNING: "PARTIAL_SELECTION_NOT_FROM_BEGINNING",
-    PARTIAL_SELECTION_NOT_TO_END: "PARTIAL_SELECTION_NOT_TO_END",
-    PARTIAL_SELECTION_NOT_FROM_END: "PARTIAL_SELECTION_NOT_FROM_END",
-    PARTIAL_SELECTION_NOT_TO_BEGINNING: "PARTIAL_SELECTION_NOT_TO_BEGINNING",
-    SELECTION_END: "SELECTION_END",
-    SELECTED: "SELECTED",
-    CTRL_BEFORE_COPY: "CTRL_BEFORE_COPY",
-    CTRL_AFTER_COPY: "CTRL_AFTER_COPY",
-    COPIED: "COPIED",
-    PASTE_TARGET_SELECTED: "PASTE_TARGET_SELECTED",
-    CTRL_BEFORE_PASTE: "CTRL_BEFORE_PASTE",
-    CTRL_AFTER_PASTE: "CTRL_AFTER_PASTE",
-    PASTED: "PASTED",
-    PASTED_MULTIPLE: "PASTED_MULTIPLE",
-    PASTED_INCORRECT: "PASTED_INCORRECT"
+  NO_SELECTION: "NO_SELECTION",
+  PARTIAL_SELECTION_NOT_FROM_BEGINNING: "PARTIAL_SELECTION_NOT_FROM_BEGINNING",
+  PARTIAL_SELECTION_NOT_TO_END: "PARTIAL_SELECTION_NOT_TO_END",
+  PARTIAL_SELECTION_NOT_FROM_END: "PARTIAL_SELECTION_NOT_FROM_END",
+  PARTIAL_SELECTION_NOT_TO_BEGINNING: "PARTIAL_SELECTION_NOT_TO_BEGINNING",
+  SELECTION_END: "SELECTION_END",
+  SELECTED: "SELECTED",
+  CTRL_BEFORE_COPY: "CTRL_BEFORE_COPY",
+  CTRL_AFTER_COPY: "CTRL_AFTER_COPY",
+  COPIED: "COPIED",
+  PASTE_TARGET_SELECTED: "PASTE_TARGET_SELECTED",
+  CTRL_BEFORE_PASTE: "CTRL_BEFORE_PASTE",
+  CTRL_AFTER_PASTE: "CTRL_AFTER_PASTE",
+  PASTED: "PASTED",
+  PASTED_MULTIPLE: "PASTED_MULTIPLE",
+  PASTED_INCORRECT: "PASTED_INCORRECT"
 })
 
 const currentStep = ref(STEPS.NO_SELECTION);
 
 const practiceStrings = [
-    "Copy this text and paste it in the box.",
-    "Now copy THIS text and paste it in the box.",
-    "Can you do it again?",
-    "I can't believe it!",
-    "You're so good at copying and pasting!",
-    "Wow, you're unstoppable!",
-    "Paste this one if you're a pro.",
-    "Is this too easy for you?",
-    "Impressive! You're a natural.",
-    "Copying and pasting is no match for you!",
-    "You're officially a copy-paste master.",
-    "Keep going, you're on a roll!",
-    "Can you paste this with your eyes closed?",
-    "Bet you can't do this one in under 3 seconds!",
-    "Copy and paste this if you're having fun!",
-    "I bet you can't guess what's next..."
+  "Copy this bold text and paste it in the box.",
+  "Now copy THIS text and paste it in the box.",
+  "Can you do it again?",
+  "I can't believe it!",
+  "You're so good at copying and pasting!",
+  "Wow, you're unstoppable!",
+  "Paste this one if you're a pro.",
+  "Is this too easy for you?",
+  "Impressive! You're a natural.",
+  "Copying and pasting is no match for you!",
+  "You're officially a copy-paste master.",
+  "Keep going, you're on a roll!",
+  "Can you paste this with your eyes closed?",
+  "Bet you can't do this one in under 3 seconds!",
+  "Copy and paste this if you're having fun!",
+  "I bet you can't guess what's next..."
 ]
 
 const currentTextIndex = ref(0);
@@ -49,23 +49,41 @@ const currentText = ref(practiceStrings[0])
 const currentSelection = ref("");
 
 const shortcutKeyOptions = {
-    "ctrl": {
-        label: "ctrl",
-        platform: "PC/Chromebook"
-    },
-    "command": {
-        label: "⌘ command",
-        platform: "Mac"
-    }
+  "ctrl": {
+    label: "ctrl",
+    platform: "PC/Chromebook"
+  },
+  "command": {
+    label: "⌘ command",
+    platform: "Mac"
+  }
 }
 
 const showInstructions = ref(true);
 
 const shortcutKey = ref("");
 
+const copiedKey = ref(null);
+
+function getShareLink(key) {
+  return `${window.location.origin}${window.location.pathname}#key=${key}`;
+}
+
+async function copyLink(key) {
+  await navigator.clipboard.writeText(getShareLink(key));
+  copiedKey.value = key;
+  setTimeout(() => {
+    if (copiedKey.value === key) copiedKey.value = null;
+  }, 2000);
+}
+
+const disableTextarea = computed(() => {
+  return ![STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.CTRL_AFTER_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep.value)
+})
+
 const PLATFORM_MODIFIER_KEYS = Object.freeze({
-    CONTROL: "Control",
-    COMMAND: "Meta"
+  CONTROL: "Control",
+  COMMAND: "Meta"
 })
 
 const platformModifier = ref("Control")
@@ -83,381 +101,356 @@ const dragging = ref(false);
 const CURRENT_TEXT_ID = 'currentTextId';
 
 function reset() {
-    copied.value = "";
-    ctrlReleasedAfterCopy.value = false;
+  copied.value = "";
+  ctrlReleasedAfterCopy.value = false;
 
-    pasted.value = "";
-    ctrlReleasedAfterPaste.value = false;
+  pasted.value = "";
+  ctrlReleasedAfterPaste.value = false;
 
-    currentSelection.value = "";
-    currentStep.value = STEPS.NO_SELECTION;
+  currentSelection.value = "";
+  currentStep.value = STEPS.NO_SELECTION;
 }
 
 function next() {
-    currentTextIndex.value++;
-    if (currentTextIndex.value === practiceStrings.length) {
-        currentTextIndex.value = 0;
-    }
-    currentText.value = practiceStrings[currentTextIndex.value];
-    reset();
+  currentTextIndex.value++;
+  if (currentTextIndex.value === practiceStrings.length) {
+    currentTextIndex.value = 0;
+  }
+  currentText.value = practiceStrings[currentTextIndex.value];
+  reset();
 }
 
 function checkStep() {
 
-    const selection = window.getSelection();
-  
-    currentSelection.value = selection.rangeCount > 0 ? selection.getRangeAt(0).toString() : "";
+  const selection = window.getSelection();
 
-    if ([STEPS.NO_SELECTION, STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING, STEPS.PARTIAL_SELECTION_NOT_TO_END, STEPS.PARTIAL_SELECTION_NOT_FROM_END, STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING, STEPS.SELECTION_END, STEPS.SELECTED].includes(currentStep.value)) {
-        if (currentSelection.value === currentText.value) {
-            if (dragging.value) {
-                currentStep.value = STEPS.SELECTION_END;
-            } else {
-                currentStep.value = STEPS.SELECTED;
-            }
-        } else if (
-            (currentSelection.value.length > 0 || selection.rangeCount === 0) &&
-            currentText.value.indexOf(currentSelection.value) > -1 &&
-            selection.anchorNode?.parentElement?.getAttribute('id') === CURRENT_TEXT_ID
-        ) {
-            if (!dragging.value) {
-                currentStep.value = STEPS.NO_SELECTION
-            } else {
-                if (selection.anchorOffset > 0) {
+  currentSelection.value = selection.rangeCount > 0 ? selection.getRangeAt(0).toString() : "";
 
-                    if (selection.anchorOffset === currentText.value.length) {
-                        currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING;
-                    } else {
-                        currentStep.value = STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING
-                    }
+  if ([STEPS.NO_SELECTION, STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING, STEPS.PARTIAL_SELECTION_NOT_TO_END, STEPS.PARTIAL_SELECTION_NOT_FROM_END, STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING, STEPS.SELECTION_END, STEPS.SELECTED].includes(currentStep.value)) {
+    if (currentSelection.value === currentText.value) {
+      if (dragging.value) {
+        currentStep.value = STEPS.SELECTION_END;
+      } else {
+        currentStep.value = STEPS.SELECTED;
+      }
+    } else if (
+        (currentSelection.value.length > 0 || selection.rangeCount === 0) &&
+        currentText.value.indexOf(currentSelection.value) > -1 &&
+        selection.anchorNode?.parentElement?.getAttribute('id') === CURRENT_TEXT_ID
+    ) {
+      if (!dragging.value) {
+        currentStep.value = STEPS.NO_SELECTION
+      } else {
+        if (selection.anchorOffset > 0) {
 
-                } else {
-                    currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_END
-                }
-
-            }
-
+          if (selection.anchorOffset === currentText.value.length) {
+            currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING;
+          } else {
+            currentStep.value = STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING
+          }
 
         } else {
-            currentStep.value = STEPS.NO_SELECTION
+          currentStep.value = STEPS.PARTIAL_SELECTION_NOT_TO_END
         }
-    }
 
-    if ([STEPS.SELECTED, STEPS.CTRL_BEFORE_COPY].includes(currentStep.value)) {
-        if (ctrlPressed.value) {
-            currentStep.value = STEPS.CTRL_BEFORE_COPY;
-        } else {
-            currentStep.value = STEPS.SELECTED;
-        }
-    }
+      }
 
-    if (![STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.PASTED, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value) && copied.value === currentText.value) {
-        if (ctrlPressed.value && !ctrlReleasedAfterCopy.value) {
-            currentStep.value = STEPS.CTRL_AFTER_COPY
-        } else {
-            ctrlReleasedAfterCopy.value = true;
-            currentStep.value = STEPS.COPIED;
-        }
-    }
 
-    if ([STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep.value)) {
-        const target = document.getElementById('pasteTarget');
-        if (target && document.activeElement === target) {
-            currentStep.value = STEPS.PASTE_TARGET_SELECTED
-        } else {
-            currentStep.value = STEPS.COPIED;
-        }
+    } else {
+      currentStep.value = STEPS.NO_SELECTION
     }
+  }
 
-    if ([STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value)) {
-        if (pasted.value === currentText.value) {
-            if (ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
-                currentStep.value = STEPS.CTRL_AFTER_PASTE;
-            } else {
-                ctrlReleasedAfterPaste.value = true;
-                currentStep.value = STEPS.PASTED;
-            }
-        } else if (countSubstrings(pasted.value, currentText.value) > 1) {
-            currentStep.value = STEPS.PASTED_MULTIPLE;
-        } else if (pasted.value && pasted.value !== currentText.value) {
-            currentStep.value = STEPS.PASTED_INCORRECT;
-        } else if (ctrlPressed.value) {
-            currentStep.value = STEPS.CTRL_BEFORE_PASTE;
-        } else {
-            currentStep.value = STEPS.PASTE_TARGET_SELECTED;
-        }
+  if ([STEPS.SELECTED, STEPS.CTRL_BEFORE_COPY].includes(currentStep.value)) {
+    if (ctrlPressed.value) {
+      currentStep.value = STEPS.CTRL_BEFORE_COPY;
+    } else {
+      currentStep.value = STEPS.SELECTED;
     }
+  }
+
+  if (![STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.PASTED, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value) && copied.value === currentText.value) {
+    if (ctrlPressed.value && !ctrlReleasedAfterCopy.value) {
+      currentStep.value = STEPS.CTRL_AFTER_COPY
+    } else {
+      ctrlReleasedAfterCopy.value = true;
+      currentStep.value = STEPS.COPIED;
+    }
+  }
+
+  if ([STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep.value)) {
+    const target = document.getElementById('pasteTarget');
+    if (target && document.activeElement === target) {
+      currentStep.value = STEPS.PASTE_TARGET_SELECTED
+    } else {
+      currentStep.value = STEPS.COPIED;
+    }
+  }
+
+  if ([STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT, STEPS.CTRL_AFTER_PASTE].includes(currentStep.value)) {
+    if (pasted.value === currentText.value) {
+      if (ctrlPressed.value && !ctrlReleasedAfterPaste.value) {
+        currentStep.value = STEPS.CTRL_AFTER_PASTE;
+      } else {
+        ctrlReleasedAfterPaste.value = true;
+        currentStep.value = STEPS.PASTED;
+      }
+    } else if (countSubstrings(pasted.value, currentText.value) > 1) {
+      currentStep.value = STEPS.PASTED_MULTIPLE;
+    } else if (pasted.value && pasted.value !== currentText.value) {
+      currentStep.value = STEPS.PASTED_INCORRECT;
+    } else if (ctrlPressed.value) {
+      currentStep.value = STEPS.CTRL_BEFORE_PASTE;
+    } else {
+      currentStep.value = STEPS.PASTE_TARGET_SELECTED;
+    }
+  }
 
 
 }
 
 function tryAgain() {
-    pasted.value = "";
-    currentStep.value = STEPS.COPIED;
+  pasted.value = "";
+  currentStep.value = STEPS.COPIED;
 }
 
 function countSubstrings(str, searchValue) {
-    let count = 0,
-        i = 0;
-    while (true) {
-        const r = str.indexOf(searchValue, i);
-        if (r !== -1) [count, i] = [count + 1, r + 1];
-        else return count;
-    }
+  let count = 0,
+      i = 0;
+  while (true) {
+    const r = str.indexOf(searchValue, i);
+    if (r !== -1) [count, i] = [count + 1, r + 1];
+    else return count;
+  }
 };
 
 function mouseDown() {
-    dragging.value = true;
-    checkStep();
+  dragging.value = true;
+  checkStep();
 }
 
 function mouseUp() {
-    dragging.value = false;
-    checkStep();
+  dragging.value = false;
+  checkStep();
 }
 
 function keyDown(e) {
-    if (e.key === platformModifier.value) {
-        ctrlPressed.value = true;
-        checkStep();
-    }
+  if (e.key === platformModifier.value) {
+    ctrlPressed.value = true;
+    checkStep();
+  }
 
 }
 
 function keyUp(e) {
-    if (e.key === platformModifier.value) {
-        ctrlPressed.value = false;
-        checkStep();
-    }
+  if (e.key === platformModifier.value) {
+    ctrlPressed.value = false;
+    checkStep();
+  }
 }
 
 
 function copy(e) {
-    e.preventDefault();
-    navigator.clipboard.writeText(currentSelection.value);
-    copied.value = currentSelection.value;
-    ctrlReleasedAfterPaste.value = false;
-    checkStep();
+  e.preventDefault();
+  navigator.clipboard.writeText(currentSelection.value);
+  copied.value = currentSelection.value;
+  ctrlReleasedAfterPaste.value = false;
+  checkStep();
 }
 
 function updateFromParams() {
-    const params = {};
-    window.location.hash.substring(1).split("&").forEach(item => {
-        const parts = item.split("=");
-        params[parts[0]] = parts[1];
-    })
+  const params = {};
+  window.location.hash.substring(1).split("&").forEach(item => {
+    const parts = item.split("=");
+    params[parts[0]] = parts[1];
+  })
 
-    const key = shortcutKeyOptions[params.key];
+  const key = shortcutKeyOptions[params.key];
 
-    if (key) {
-        shortcutKey.value = key.label;
-    } else {
-        shortcutKey.value = null;
-    }
+  if (key) {
+    shortcutKey.value = key.label;
+  } else {
+    shortcutKey.value = null;
+  }
 
 }
 
 onMounted(() => {
-    document.addEventListener('mousedown', mouseDown)
-    document.addEventListener('mouseup', mouseUp);
-    document.addEventListener('click', checkStep);
+  document.addEventListener('mousedown', mouseDown)
+  document.addEventListener('mouseup', mouseUp);
+  document.addEventListener('click', checkStep);
 
-    document.addEventListener('copy', copy);
+  document.addEventListener('copy', copy);
 
-    document.addEventListener('paste', checkStep);
+  document.addEventListener('paste', checkStep);
 
-    document.addEventListener('selectstart', checkStep);
+  document.addEventListener('selectstart', checkStep);
 
-    document.addEventListener('selectionchange', checkStep);
+  document.addEventListener('selectionchange', checkStep);
 
-    document.addEventListener('keydown', keyDown)
+  document.addEventListener('keydown', keyDown)
 
-    document.addEventListener('keyup', keyUp)
+  document.addEventListener('keyup', keyUp)
 
-    window.addEventListener('hashchange', updateFromParams)
+  window.addEventListener('hashchange', updateFromParams)
 
-    updateFromParams();
+  updateFromParams();
 
-    if (navigator.platform.toLowerCase().indexOf('mac') > -1) {
-        platformModifier.value = PLATFORM_MODIFIER_KEYS.COMMAND;
-    } else {
-        platformModifier.value = PLATFORM_MODIFIER_KEYS.CONTROL;
-    }
+  if (navigator.platform.toLowerCase().indexOf('mac') > -1) {
+    platformModifier.value = PLATFORM_MODIFIER_KEYS.COMMAND;
+  } else {
+    platformModifier.value = PLATFORM_MODIFIER_KEYS.CONTROL;
+  }
 
 })
 
 </script>
 
 <template>
-    <div id="app">
-        <div v-if="shortcutKey">
+  <div class="select-none max-w-4xl mx-auto">
+    <div v-if="shortcutKey" class="mt-40">
 
-            <div id="workspace" class="panel">
-                <div class="selectable" :id="CURRENT_TEXT_ID">{{ currentText }}</div>
-                <textarea
-                        :disabled="![STEPS.COPIED, STEPS.PASTE_TARGET_SELECTED, STEPS.CTRL_BEFORE_PASTE, STEPS.CTRL_AFTER_PASTE, STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
-                        v-model="pasted" @input="checkStep" id="pasteTarget"
-
-                ></textarea>
-            </div>
-            <div id="instructions" class="panel">
-                <div v-if="showInstructions">
-                    <div v-if="currentStep === STEPS.NO_SELECTION">
-<!--                        Click and drag over the text to select it.-->
-                        <highlight-demo text="Click and drag over the text to select it."></highlight-demo>
-                        <div v-if="currentSelection">Start from the beginning and go all the way to the end.</div>
-                    </div>
-                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
-                        Let go of the mouse and try again. Make sure you start at the very beginning!
-                    </div>
-                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
-                        Keep going all the way to the end!
-                    </div>
-                    <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
-                        Keep going all the way to the beginning!
-                    </div>
-                    <div v-if="currentStep === STEPS.SELECTION_END">
-                        Let go of your mouse.
-                    </div>
-                    <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
-                        Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.
-                    </div>
-
-                    <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
-                        Quickly tap the <span class="key">C</span> key on your keyboard to copy.
-                    </div>
-
-                    <div v-if="currentStep === STEPS.COPIED">
-                        Click inside the box to tell your computer where to paste.
-                    </div>
-
-                    <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
-                        Quickly tap the <span class="key">V</span> on your keyboard to paste.
-                    </div>
-
-                    <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-                        Let go of <span class="key">{{ shortcutKey }}</span>.
-                    </div>
-                </div>
-
-                <div v-if="currentStep === STEPS.PASTED">
-                    Done!
-                    <button @click="next">Try another</button>
-                </div>
-
-                <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
-                    Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
-                    press will do.
-                    <button @click="tryAgain">Try again</button>
-                </div>
-
-                <div v-if="currentStep === STEPS.PASTED_INCORRECT">
-                    Hmm... that doesn't look quite right. Let's try one more time!
-                    <button @click="reset">Try again</button>
-                </div>
-                <button v-if="![STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
-                        @click="showInstructions = !showInstructions"><span
-                    v-if="showInstructions">Hide</span><span v-else>Show</span> instructions
-                </button>
-            </div>
-
+      <div id="workspace" class="panel">
+        <div
+            class="text-center text-4xl select-text selection:bg-light-orange selection:text-white text-dark-blue font-bold"
+            :id="CURRENT_TEXT_ID">{{ currentText }}
         </div>
-        <div v-else>
+        <textarea
+            :disabled="disableTextarea"
+            :title="disableTextarea ? 'You need to copy the text before you can paste it in the box!': ''"
+            v-model="pasted" @input="checkStep" id="pasteTarget"
+            class="mx-auto block border-3 focus:border-4 text-dark-blue focus:outline-hidden border-light-orange my-8 disabled:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed rounded p-3 w-full h-30 text-4xl resize-none text-center font-bold flex"
 
-            <h1 style="font-size: 1.2em; margin-top: 40px; margin-bottom: 20px;">Which modifier key do your <em>students</em> use on their
-                keyboards?</h1>
-            <div id="key-select">
-                <div v-for="key of Object.keys(shortcutKeyOptions)">
-                    <a class="key" :href="`#key=${key}`">
-                        {{ shortcutKeyOptions[key].label }}
-                    </a>
-                    ({{ shortcutKeyOptions[key].platform }})
-                </div>
-            </div>
+        ></textarea>
+      </div>
+      <div id="instructions" class="text-center text-2xl text-zinc-600 [&_p]:mb-5">
+        <div v-if="showInstructions">
+          <div v-if="currentStep === STEPS.NO_SELECTION">
+            <!--                        Click and drag over the text to select it.-->
+            <p>
+              <highlight-demo text="Click and drag over the text to select it."></highlight-demo>
+            </p>
+            <p v-if="currentSelection">Start from the beginning and go all the way to the end.</p>
+          </div>
+          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
+            <p>Let go of the mouse and try again. Make sure you start at the very beginning!</p>
+          </div>
+          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
+            <p>Keep going all the way to the end!</p>
+          </div>
+          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
+            <p>Keep going all the way to the beginning!</p>
+          </div>
+          <div v-if="currentStep === STEPS.SELECTION_END">
+            <p>Let go of your mouse.</p>
+          </div>
+          <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
+            <p>Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.</p>
+          </div>
 
-            <p style="margin-top: 40px; font-size: 0.6em; max-width: 60%; margin-left: auto; margin-right: auto">You can demo this from any computer - PC, Chromebook, or Mac.</p>
+          <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
+            <p>Quickly tap the <span class="key">C</span> key on your keyboard to copy.</p>
+          </div>
+
+          <div v-if="currentStep === STEPS.COPIED">
+            <p>Click inside the box to tell your computer where to paste.</p>
+          </div>
+
+          <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
+            <p>Quickly tap the <span class="key">V</span> on your keyboard to paste.</p>
+          </div>
+
+          <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
+            <p>Let go of <span class="key">{{ shortcutKey }}</span>.</p>
+          </div>
         </div>
+
+        <div v-if="currentStep === STEPS.PASTED">
+          <p>You did it!</p>
+          <button class="button" @click="next">Try another</button>
+        </div>
+
+        <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
+          <p>Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
+            press will do.</p>
+          <button class="button" @click="tryAgain">Try again</button>
+        </div>
+
+        <div v-if="currentStep === STEPS.PASTED_INCORRECT">
+          <p>Hmm... that doesn't look quite right. Let's try one more time!</p>
+          <button class="button" @click="reset">Try again</button>
+        </div>
+        <button class="button"
+                v-if="![STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
+                @click="showInstructions = !showInstructions"><span
+            v-if="showInstructions">Hide</span><span v-else>Show</span> hints
+        </button>
+      </div>
+
+    </div>
+    <div v-else class="text-2xl">
+      <div id="title" class="text-center text-8xl mt-15 mb-10 font-[Luckiest_Guy] text-yellow">
+        <h1>Copy & Paste Practice</h1>
+      </div>
+
+      <div class="bg-orange-50 p-5 border-5 rounded-2xl border-orange [&_p]:mb-2 text-2xl/10 text-gray-700">
+        <p class="font-bold">Teacher instructions:</p>
+        <p>This activity walks students through selecting text, copying it, and pasting it.</p>
+        <p>Pick the keyboard that matches your students' devices. Click <strong>Open</strong> to launch it
+          or <strong>Copy link</strong> to share it with students.</p>
+        <div class="grid grid-cols-2 items-start gap-x-10 gap-y-6 mx-auto my-6 w-fit mt-10">
+          <template v-for="key of Object.keys(shortcutKeyOptions)" :key="key">
+            <div class="text-center">
+              <span class="key block w-full">{{ shortcutKeyOptions[key].label }}</span>
+              <span class="text-lg text-zinc-500 whitespace-nowrap block mt-1">({{
+                  shortcutKeyOptions[key].platform
+                }})</span>
+            </div>
+            <div class="flex gap-2 justify-self-end">
+              <a class="button" :href="`#key=${key}`">Open</a>
+              <a class="button" :href="`#key=${key}`" @click.prevent="copyLink(key)">
+                {{ copiedKey === key ? 'Copied!' : 'Copy link' }}
+              </a>
+            </div>
+          </template>
+        </div>
+        <details class="text-xl/9">
+          <summary class="font-bold">What if my students and I use different keyboards?</summary>
+          <p>Either link works on any device. The keyboard selection only controls the key that appears in the instructions. For example, if you open the <span class="key leading-7">{{shortcutKeyOptions['ctrl'].label}}</span> link on a Mac, you can still press the <span class="key leading-7">{{ shortcutKeyOptions['command'].label }}</span> key while demonstrating the activity.</p>
+        </details>
+      </div>
     </div>
 
+
+  </div>
 
 
 </template>
 
 <style scoped>
-
-.selectable {
-    -webkit-user-select: text;
-    user-select: text;
-}
-
-#app {
-    -webkit-user-select: none;
-    user-select: none;
-    text-align: center;
-    font-size: 2.5em;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    padding-top: 3em;
-    margin: 0;
-}
-
-textarea {
-    font-family: inherit;
-    font-size: inherit;
-    text-align: inherit;
-    resize: none;
-    background: white;
-    border-style: solid;
-    border-width: 2px;
-}
-
-textarea:disabled {
-    background: #f5f5f5;
-    cursor: not-allowed;
-}
-
-button {
-    display: block;
-    font-family: inherit;
-    font-size: inherit;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 10px;
-}
-
-#instructions {
-    font-size: 0.8em;
-    max-width: 60%;
-    margin-left: auto;
-    margin-right: auto;
-    color: var(--vt-c-text-light-2)
-}
-
-#instructions h2 {
-    color: var(--vt-c-text-light-1);
-}
-
-#instructions button {
-    font-size: 0.5em;
+@reference "./assets/main.css";
+#title {
+  --shadow: var(--color-orange);
+  text-shadow: 1px 1px 0px var(--shadow), 2px 2px 0px var(--shadow), 3px 3px 0px var(--shadow), 4px 4px 0px var(--shadow), 5px 5px 0px var(--shadow), 6px 6px 0px var(--shadow), 7px 7px 0px var(--shadow), 8px 8px 0px var(--shadow);
 }
 
 .key {
-    display: inline-block;
-    background: #181818;
-    color: #f2f2f2;
-    padding: 0 10px;
+  @apply inline-block text-white rounded bg-light-blue px-4 mr-2 ml-1 text-center;
+  --shadow: var(--color-dark-blue);
+  box-shadow: 1px 1px 0px var(--shadow), 2px 2px 0px var(--shadow), 3px 3px 0px var(--shadow), 4px 4px 0px var(--shadow);
 }
 
-a.key {
-    text-decoration: none;
+
+.button:hover {
+  @apply text-light-orange
 }
 
-#key-select {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    column-gap: 1em;
+.button {
+  @apply mx-auto text-orange border-2 border-orange cursor-pointer block transition-colors py-1 px-4 rounded-full text-lg font-bold whitespace-nowrap text-center;
+}
+
+.button:hover {
+  @apply bg-orange text-white;
 }
 
 

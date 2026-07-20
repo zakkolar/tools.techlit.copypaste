@@ -1,1 +1,16 @@
-@import "base.css";
+@import url('https://api.fonts.coollabs.io/css2?family=Quicksand:wght@300..700&family=Luckiest+Guy&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+    --color-orange: #ff7300;
+    --color-light-orange: #ff9336;
+    --color-yellow: #ffcc00;
+    --color-light-blue: #4fb3ff;
+    --color-dark-blue: #004287;
+}
+
+body {
+    font-family: "Quicksand", sans-serif;
+}
+

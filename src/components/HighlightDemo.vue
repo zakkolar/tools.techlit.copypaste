@@ -100,7 +100,8 @@ function toggleAnimation() {
 </template>
 <style scoped>
 .highlighted {
-    background-color: lightblue;
+    background-color: var(--color-light-orange);
+  color: white;
 }
 
 #cursor {
