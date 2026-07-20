@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="1812"
-   height="1208"
-   viewBox="0 0 479.375 319.58333"
+   width="1800"
+   height="900"
+   viewBox="0 0 476.20026 238.10015"
    version="1.1"
    id="svg5"
    sodipodi:docname="logo.svg"
@@ -27,19 +27,32 @@
      inkscape:deskcolor="#505050"
      inkscape:document-units="mm"
      showgrid="false"
-     inkscape:zoom="0.58374033"
-     inkscape:cx="611.5733"
-     inkscape:cy="391.44117"
+     inkscape:zoom="0.59470704"
+     inkscape:cx="913.0546"
+     inkscape:cy="214.39127"
      inkscape:window-width="2189"
      inkscape:window-height="1427"
-     inkscape:window-x="67"
-     inkscape:window-y="40"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1" />
   <defs
      id="defs2">
+    <pattern
+       id="dotPattern"
+       patternUnits="userSpaceOnUse"
+       width="15"
+       height="15"
+       patternTransform="rotate(45)">
+      <circle
+         cx="8"
+         cy="8"
+         r="2.75"
+         fill="#ffedd4"
+         id="dot1" />
+    </pattern>
     <filter
-       style="color-interpolation-filters:sRGB;"
+       style="color-interpolation-filters:sRGB"
        inkscape:label="Drop Shadow"
        id="filter8908"
        x="0"
@@ -80,264 +93,23 @@
      inkscape:groupmode="layer"
      id="layer1">
     <rect
-       style="fill:#ffffff;fill-opacity:1;stroke-width:0.26497236;stroke-dasharray:none"
+       style="fill:#ffffff;fill-opacity:1;stroke-width:0.228673;stroke-dasharray:none"
        id="rect22502"
        width="478.98315"
-       height="319.64093"
+       height="238.06351"
        x="0.51343626"
        y="-0.02775931" />
-    <g
-       id="g-copypaste-icon"
-       aria-label="Ctrl+C then Ctrl+V keyboard shortcut keys"
-       style="fill:#ff7300;fill-opacity:1"
-       transform="matrix(1.2463451,0,0,1.2463451,-70.03362,202.16779)">
-      <g
-         id="key-c"
-         transform="translate(21.316371)">
-        <g
-           transform="translate(3.3938092,-5.6704222)"
-           id="key-c-shadow1"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27676"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(2.8646425,-6.1995889)"
-           id="key-c-shadow2"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27679"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(2.3354758,-6.7287556)"
-           id="key-c-shadow3"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27682"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(1.8063091,-7.2579223)"
-           id="key-c-shadow4"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27685"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(1.2771424,-7.787089)"
-           id="key-c-shadow5"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27688"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.74797573,-8.3162557)"
-           id="key-c-shadow6"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27691"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.21880906,-8.8454224)"
-           id="key-c-shadow7"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27694"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.2188091,-8.8454224)"
-           id="key-c-face">
-          <rect
-             x="176.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             style="fill:#4fb3ff;fill-opacity:1;stroke-width:0.999619;stroke-dasharray:none"
-             id="rect27697" />
-          <text
-             x="198.19"
-             y="33.629211"
-             text-anchor="middle"
-             dominant-baseline="central"
-             style="font-weight:bold;font-size:22px;font-family:Quicksand;fill:#ffffff;fill-opacity:1;stroke-width:0.999619;stroke-dasharray:none;-inkscape-font-specification:'Quicksand, Bold';font-style:normal;font-stretch:normal;font-variant:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;dominant-baseline:central;text-anchor:middle"
-             id="text27699">C</text>
-        </g>
-      </g>
-      <g
-         id="key-v">
-        <g
-           transform="translate(3.3938092,-5.6704222)"
-           id="key-v-shadow1"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27703"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(2.8646425,-6.1995889)"
-           id="key-v-shadow2"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27706"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(2.3354758,-6.7287556)"
-           id="key-v-shadow3"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27709"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(1.8063091,-7.2579223)"
-           id="key-v-shadow4"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27712"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(1.2771424,-7.787089)"
-           id="key-v-shadow5"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27715"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.74797573,-8.3162557)"
-           id="key-v-shadow6"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27718"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.21880906,-8.8454224)"
-           id="key-v-shadow7"
-           style="fill:#004287;fill-opacity:1">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             id="rect27721"
-             style="fill:#004287;fill-opacity:1" />
-        </g>
-        <g
-           transform="translate(0.2188091,-8.8454224)"
-           id="key-v-face">
-          <rect
-             x="259.19"
-             y="9"
-             width="44"
-             height="44"
-             rx="8"
-             ry="8"
-             style="fill:#4fb3ff;fill-opacity:1;stroke-width:0.999619;stroke-dasharray:none"
-             id="rect27724" />
-          <text
-             x="281.19"
-             y="33.629211"
-             text-anchor="middle"
-             dominant-baseline="central"
-             style="font-weight:normal;font-size:22px;font-family:Quicksand;fill:#ffffff;fill-opacity:1;stroke-width:0.999619;stroke-dasharray:none;-inkscape-font-specification:'Quicksand, @wght=700';font-style:normal;font-stretch:normal;font-variant:normal;font-variation-settings:'wght' 700;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;dominant-baseline:central;text-anchor:middle"
-             id="text27726">V</text>
-        </g>
-      </g>
-    </g>
+    <rect
+       style="display:inline;fill:url(#dotPattern);stroke-width:0.228673;stroke-dasharray:none"
+       id="rect22503"
+       width="478.98315"
+       height="238.06351"
+       x="0.51343626"
+       y="-0.02775931"
+       inkscape:label="dots" />
     <g
        id="g22448"
-       transform="matrix(1.2237705,0,0,1.2237705,-2.6661927,-27.932195)">
+       transform="matrix(1.4185294,0,0,1.4185294,-46.19303,-47.931295)">
       <g
          aria-label="Copy &amp; Paste Practice"
          id="g16038"
