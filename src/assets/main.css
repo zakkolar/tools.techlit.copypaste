@@ -11,6 +11,14 @@
 }
 
 body {
+    --dots: var(--color-orange-100);
     font-family: "Quicksand", sans-serif;
+background-color: #ffffff;
+
+
+opacity: 1;
+background-image:  radial-gradient(var(--dots) 1.65px, transparent 1.65px), radial-gradient(var(--dots) 1.65px, #ffffff 1.65px);
+background-size: 22px 22px;
+background-position: 0 0,11px 11px;
 }
 

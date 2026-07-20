@@ -24,7 +24,7 @@ const STEPS = Object.freeze({
 const currentStep = ref(STEPS.NO_SELECTION);
 
 const practiceStrings = [
-  "Copy this bold text and paste it in the box.",
+  "Copy this text and paste it in the box below.",
   "Now copy THIS text and paste it in the box.",
   "Can you do it again?",
   "I can't believe it!",
@@ -109,6 +109,8 @@ function reset() {
 
   currentSelection.value = "";
   currentStep.value = STEPS.NO_SELECTION;
+
+  window.getSelection()?.removeAllRanges();
 }
 
 function next() {
@@ -254,7 +256,9 @@ function copy(e) {
   e.preventDefault();
   navigator.clipboard.writeText(currentSelection.value);
   copied.value = currentSelection.value;
-  ctrlReleasedAfterPaste.value = false;
+  if(![STEPS.PASTED].includes(currentStep.value)){
+      ctrlReleasedAfterPaste.value = false;
+  }
   checkStep();
 }
 
@@ -307,95 +311,110 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="select-none max-w-4xl mx-auto">
-    <div v-if="shortcutKey" class="mt-40">
+  <div class="select-none selection:bg-light-orange selection:text-white max-w-4xl mx-auto">
+    <div v-if="shortcutKey" class="mt-10">
 
-      <div id="workspace" class="panel">
+      <div class="text-center mb-8">
+        <h1 class="title-text title-text--sm text-3xl sm:text-4xl font-[Luckiest_Guy] text-yellow">Copy & Paste Practice</h1>
+      </div>
+
+      <div class="panel">
         <div
-            class="text-center text-4xl select-text selection:bg-light-orange selection:text-white text-dark-blue font-bold"
+            class="text-center text-4xl select-text text-dark-blue font-bold"
             :id="CURRENT_TEXT_ID">{{ currentText }}
         </div>
         <textarea
             :disabled="disableTextarea"
-            :title="disableTextarea ? 'You need to copy the text before you can paste it in the box!': ''"
+            :title="disableTextarea ? 'You need to copy the text before you can paste it in the box': ''"
             v-model="pasted" @input="checkStep" id="pasteTarget"
-            class="mx-auto block border-3 focus:border-4 text-dark-blue focus:outline-hidden border-light-orange my-8 disabled:border-gray-400 disabled:bg-gray-100 disabled:cursor-not-allowed rounded p-3 w-full h-30 text-4xl resize-none text-center font-bold flex"
+            class="mx-auto block bg-orange-100 transition-colors outline-hidden focus:outline-3 focus:outline-solid focus:outline-orange text-orange my-8 disabled:bg-gray-100 disabled:cursor-not-allowed rounded-xl p-3 w-full h-30 text-4xl resize-none text-center font-bold flex"
 
         ></textarea>
       </div>
-      <div id="instructions" class="text-center text-2xl text-zinc-600 [&_p]:mb-5">
-        <div v-if="showInstructions">
-          <div v-if="currentStep === STEPS.NO_SELECTION">
-            <!--                        Click and drag over the text to select it.-->
-            <p>
-              <highlight-demo text="Click and drag over the text to select it."></highlight-demo>
-            </p>
-            <p v-if="currentSelection">Start from the beginning and go all the way to the end.</p>
-          </div>
-          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
-            <p>Let go of the mouse and try again. Make sure you start at the very beginning!</p>
-          </div>
-          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
-            <p>Keep going all the way to the end!</p>
-          </div>
-          <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
-            <p>Keep going all the way to the beginning!</p>
-          </div>
-          <div v-if="currentStep === STEPS.SELECTION_END">
-            <p>Let go of your mouse.</p>
-          </div>
-          <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
-            <p>Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.</p>
-          </div>
+      <div id="instructions" class="text-center text-2xl text-zinc-600 mt-8 [&_p]:mb-5">
+        <Transition name="content-swap" mode="out-in">
+          <div :key="currentStep">
+            <Transition name="content-collapse">
+              <div v-if="showInstructions" class="collapse-rows">
+                <div class="collapse-content">
+                  <div v-if="currentStep === STEPS.NO_SELECTION">
+                    <p>
+                      <highlight-demo text="Click and drag over the text to select it."></highlight-demo>
+                    </p>
+                    <p v-if="currentSelection">Start from the beginning and go all the way to the end.</p>
+                  </div>
+                  <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_FROM_BEGINNING">
+                    <p>Let go of the mouse and try again. Make sure you start at the very beginning!</p>
+                  </div>
+                  <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_END">
+                    <p>Keep going all the way to the end!</p>
+                  </div>
+                  <div v-if="currentStep === STEPS.PARTIAL_SELECTION_NOT_TO_BEGINNING">
+                    <p>Keep going all the way to the beginning!</p>
+                  </div>
+                  <div v-if="currentStep === STEPS.SELECTION_END">
+                    <p>Let go of your mouse.</p>
+                  </div>
+                  <div v-if="[STEPS.SELECTED, STEPS.PASTE_TARGET_SELECTED].includes(currentStep)">
+                    <p>Press and hold the <span class="key">{{ shortcutKey }}</span> key on your keyboard.</p>
+                  </div>
 
-          <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
-            <p>Quickly tap the <span class="key">C</span> key on your keyboard to copy.</p>
+                  <div v-if="[STEPS.CTRL_BEFORE_COPY].includes(currentStep)">
+                    <p>Quickly tap the <span class="key">C</span> key on your keyboard to copy.</p>
+                  </div>
+
+                  <div v-if="currentStep === STEPS.COPIED">
+                    <p>Click inside the box to tell your computer where to paste.</p>
+                  </div>
+
+                  <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
+                    <p>Quickly tap the <span class="key">V</span> on your keyboard to paste.</p>
+                  </div>
+
+                  <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
+                    <p>Let go of <span class="key">{{ shortcutKey }}</span>.</p>
+                  </div>
+                </div>
+              </div>
+            </Transition>
+
+            <div v-if="currentStep === STEPS.PASTED">
+              <p>You did it!</p>
+              <button class="button" @click="next">Try another</button>
+            </div>
+
+            <div v-else-if="currentStep === STEPS.PASTED_MULTIPLE">
+              <p>Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
+                press will do.</p>
+              <button class="button" @click="tryAgain">Try again</button>
+            </div>
+
+            <div v-else-if="currentStep === STEPS.PASTED_INCORRECT">
+              <p>Hmm... that doesn't look quite right. Let's try one more time!</p>
+              <button class="button" @click="reset">Try again</button>
+            </div>
           </div>
-
-          <div v-if="currentStep === STEPS.COPIED">
-            <p>Click inside the box to tell your computer where to paste.</p>
+        </Transition>
+        <Transition name="content-collapse">
+          <div v-if="![STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)" class="collapse-rows">
+            <div class="collapse-content">
+              <button class="button" @click="showInstructions = !showInstructions"><span
+                  v-if="showInstructions">Hide</span><span v-else>Show</span> hints
+              </button>
+            </div>
           </div>
-
-          <div v-if="currentStep === STEPS.CTRL_BEFORE_PASTE">
-            <p>Quickly tap the <span class="key">V</span> on your keyboard to paste.</p>
-          </div>
-
-          <div v-if="[STEPS.CTRL_AFTER_COPY, STEPS.CTRL_AFTER_PASTE].includes(currentStep)">
-            <p>Let go of <span class="key">{{ shortcutKey }}</span>.</p>
-          </div>
-        </div>
-
-        <div v-if="currentStep === STEPS.PASTED">
-          <p>You did it!</p>
-          <button class="button" @click="next">Try another</button>
-        </div>
-
-        <div v-if="currentStep === STEPS.PASTED_MULTIPLE">
-          <p>Oh no! Too many pastes! When you paste, don't hold <span class="key">V</span> down. Just a quick
-            press will do.</p>
-          <button class="button" @click="tryAgain">Try again</button>
-        </div>
-
-        <div v-if="currentStep === STEPS.PASTED_INCORRECT">
-          <p>Hmm... that doesn't look quite right. Let's try one more time!</p>
-          <button class="button" @click="reset">Try again</button>
-        </div>
-        <button class="button"
-                v-if="![STEPS.PASTED, STEPS.PASTED_MULTIPLE, STEPS.PASTED_INCORRECT].includes(currentStep)"
-                @click="showInstructions = !showInstructions"><span
-            v-if="showInstructions">Hide</span><span v-else>Show</span> hints
-        </button>
+        </Transition>
       </div>
 
     </div>
     <div v-else class="text-2xl">
-      <div id="title" class="text-center text-8xl mt-15 mb-10 font-[Luckiest_Guy] text-yellow">
-        <h1>Copy & Paste Practice</h1>
+      <div class="text-center mt-15 mb-10">
+        <h1 class="title-text title-text--lg text-8xl font-[Luckiest_Guy] text-yellow">Copy & Paste Practice</h1>
       </div>
 
-      <div class="bg-orange-50 p-5 border-5 rounded-2xl border-orange [&_p]:mb-2 text-2xl/10 text-gray-700">
+      <div class="panel [&_p]:mb-2 text-2xl/10 text-gray-700">
         <p class="font-bold">Teacher instructions:</p>
-        <p>This activity walks students through selecting text, copying it, and pasting it.</p>
+        <p>This activity walks students through selecting, copying, and pasting text.</p>
         <p>Pick the keyboard that matches your students' devices. Click <strong>Open</strong> to launch it
           or <strong>Copy link</strong> to share it with students.</p>
         <div class="grid grid-cols-2 items-start gap-x-10 gap-y-6 mx-auto my-6 w-fit mt-10">
@@ -429,9 +448,22 @@ onMounted(() => {
 
 <style scoped>
 @reference "./assets/main.css";
-#title {
+.title-text {
   --shadow: var(--color-orange);
+}
+
+.title-text--lg {
   text-shadow: 1px 1px 0px var(--shadow), 2px 2px 0px var(--shadow), 3px 3px 0px var(--shadow), 4px 4px 0px var(--shadow), 5px 5px 0px var(--shadow), 6px 6px 0px var(--shadow), 7px 7px 0px var(--shadow), 8px 8px 0px var(--shadow);
+}
+
+.title-text--sm {
+  text-shadow: 1px 1px 0px var(--shadow), 2px 2px 0px var(--shadow), 3px 3px 0px var(--shadow);
+}
+
+.panel {
+  @apply bg-white rounded-2xl border-3  border-dark-blue p-6;
+  --shadow: var(--color-dark-blue);
+  box-shadow: 1px 1px 0px var(--shadow), 2px 2px 0px var(--shadow), 3px 3px 0px var(--shadow), 4px 4px 0px var(--shadow), 5px 5px 0px var(--shadow), 6px 6px 0px var(--shadow);
 }
 
 .key {
@@ -441,16 +473,55 @@ onMounted(() => {
 }
 
 
-.button:hover {
-  @apply text-light-orange
-}
-
 .button {
-  @apply mx-auto text-orange border-2 border-orange cursor-pointer block transition-colors py-1 px-4 rounded-full text-lg font-bold whitespace-nowrap text-center;
+  @apply mx-auto bg-white text-orange border-2 border-orange cursor-pointer block transition-colors py-1 px-4 rounded-full text-lg font-bold whitespace-nowrap text-center;
 }
 
 .button:hover {
   @apply bg-orange text-white;
+}
+
+.content-swap-enter-active,
+.content-swap-leave-active {
+  transition: opacity 0.18s ease;
+}
+
+.content-swap-enter-from,
+.content-swap-leave-to {
+  opacity: 0;
+}
+
+.collapse-rows {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.collapse-content {
+  overflow: hidden;
+}
+
+.content-collapse-enter-active,
+.content-collapse-leave-active {
+  transition: grid-template-rows 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.content-collapse-enter-from,
+.content-collapse-leave-to {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transform: translateY(-0.5rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .content-collapse-enter-active,
+  .content-collapse-leave-active {
+    transition: grid-template-rows 0.18s ease, opacity 0.18s ease;
+  }
+
+  .content-collapse-enter-from,
+  .content-collapse-leave-to {
+    transform: none;
+  }
 }
 
 
