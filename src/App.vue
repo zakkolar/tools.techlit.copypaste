@@ -440,6 +440,9 @@ onMounted(() => {
         <faq question="Is this privacy-friendly?">
           Yes! This app doesn't collect any data.
         </faq>
+        <faq question="Is this open-source?">
+          Yes! The source code is <a href="https://github.com/zakkolar/tools.techlit.copypaste" target="_blank">here</a>.
+        </faq>
         <faq question="Who made this?">
           My name is Zak Kolar and I'm an educator. See more information <a href="https://techlit.tools/about/">here</a>.
         </faq>
