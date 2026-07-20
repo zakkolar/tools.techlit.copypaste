@@ -1,6 +1,7 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import HighlightDemo from "@/components/HighlightDemo.vue";
+import Faq from "@/components/Faq.vue";
 
 const STEPS = Object.freeze({
   NO_SELECTION: "NO_SELECTION",
@@ -433,10 +434,18 @@ onMounted(() => {
             </div>
           </template>
         </div>
-        <details class="text-xl/9">
-          <summary class="font-bold">What if my students and I use different keyboards?</summary>
-          <p>Either link works on any device. The keyboard selection only controls the key that appears in the instructions. For example, if you open the <span class="key leading-7">{{shortcutKeyOptions['ctrl'].label}}</span> link on a Mac, you can still press the <span class="key leading-7">{{ shortcutKeyOptions['command'].label }}</span> key while demonstrating the activity.</p>
-        </details>
+        <faq question="What if my students and I use different keyboards?">
+          Both links work on any device. The keyboard selection only controls the key that appears in the instructions. For example, if you open the <span class="key leading-7">{{shortcutKeyOptions['ctrl'].label}}</span> link on a Mac, you can still press the <span class="key leading-7">{{ shortcutKeyOptions['command'].label }}</span> key while demonstrating the activity.
+        </faq>
+        <faq question="Is this privacy-friendly?">
+          Yes! This app doesn't collect any data.
+        </faq>
+        <faq question="Who made this?">
+          My name is Zak Kolar and I'm an educator. See more information <a href="https://techlit.tools/about/">here</a>.
+        </faq>
+        <faq question="Are there activities for other skills?">
+          Yes! Check out the collection <a href="https://techlit.tools/">here</a>.
+        </faq>
       </div>
     </div>
 
